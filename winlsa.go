@@ -1,6 +1,7 @@
 package winlsa
 
 import (
+	"fmt"
 	"syscall"
 	"time"
 	"unsafe"
@@ -20,6 +21,8 @@ type LogonType uint32
 
 func (lt LogonType) String() string {
 	switch lt {
+	case LogonTypeSystem:
+		return "System"
 	case LogonTypeInteractive:
 		return "Interactive"
 	case LogonTypeNetwork:
@@ -45,12 +48,17 @@ func (lt LogonType) String() string {
 	case LogonTypeCachedUnlock:
 		return "CachedUnlock"
 	default:
-		return "UndefinedLogonType"
+		return fmt.Sprintf("Undefined LogonType(%d)", lt)
 	}
 }
 
 const (
-	LogonTypeInteractive LogonType = iota + 2
+	// Not explicitly defined in LSA, but according to
+	// https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-logonsession,
+	// LogonType=0 is "Used only by the System account."
+	LogonTypeSystem LogonType = iota
+	_ // LogonType=1 is not used
+	LogonTypeInteractive
 	LogonTypeNetwork
 	LogonTypeBatch
 	LogonTypeService

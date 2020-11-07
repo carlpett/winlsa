@@ -21,6 +21,6 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Printf("logonid: %v\nlogontype: %v\nusername: %s\nsession: %v\nsid: %s\n\n", luid, sd.LogonType, sd.UserName, sd.Session, sd.Sid)
+		fmt.Printf("logonid: %v\nlogontype: %v (%d)\nusername: %s\nsession: %v\nsid: %s\n\n", luid, sd.LogonType, sd.LogonType, sd.UserName, sd.Session, sd.Sid)
 	}
 }
