@@ -2,6 +2,7 @@ package winlsa
 
 import (
 	"fmt"
+	"reflect"
 	"syscall"
 	"time"
 	"unsafe"
@@ -134,7 +135,12 @@ func stringFromLSAString(s lsa.LSA_UNICODE_STRING) string {
 	if s.Buffer == 0 || s.Length == 0 {
 		return ""
 	}
-	return syscall.UTF16ToString((*[4096]uint16)(unsafe.Pointer(s.Buffer))[:s.Length])
+	var data []uint16
+	sh := (*reflect.SliceHeader)(unsafe.Pointer(&data))
+	sh.Data = s.Buffer
+	sh.Len = int(s.Length)
+	sh.Cap = int(s.Length)
+	return syscall.UTF16ToString(data)
 }
 func timeFromUint64(nsec uint64) time.Time {
 	if nsec == 0 || nsec == ^uint64(0)>>1 {
@@ -152,10 +158,14 @@ func GetLogonSessions() ([]LUID, error) {
 		return nil, err
 	}
 
-	data := (*[]LUID)(unsafe.Pointer(&buffer))
+	var data []LUID
+	sh := (*reflect.SliceHeader)(unsafe.Pointer(&data))
+	sh.Data = buffer
+	sh.Len = int(cnt)
+	sh.Cap = int(cnt)
 	luids := make([]LUID, cnt)
 	for idx := uint32(0); idx < cnt; idx++ {
-		luids[idx] = (*data)[idx]
+		luids[idx] = data[idx]
 	}
 
 	err = lsa.LsaFreeReturnBuffer(buffer)
